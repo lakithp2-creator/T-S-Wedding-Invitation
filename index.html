@@ -1032,12 +1032,12 @@
               <label class="rsvp-label" for="rsvpConfirmation">Will You Attend?</label>
               <select class="rsvp-input" id="rsvpConfirmation" name="confirmation" required>
                 <option value="" disabled selected>Please choose one</option>
-                <option value="Joyfully Accepts">Joyfully Accepts</option>
-                <option value="Regretfully Declines">Regretfully Declines</option>
+                <option value="Accept">Joyfully accept</option>
+                <option value="Decline">Regretfully decline</option>
               </select>
             </div>
-            <div class="rsvp-field">
-              <label class="rsvp-label" for="rsvpBlessing">Add a Blessing <span class="rsvp-optional">(Optional)</span></label>
+            <div class="rsvp-field" id="rsvpBlessingField" hidden>
+              <label class="rsvp-label" for="rsvpBlessing">Add a Blessing</label>
               <textarea class="rsvp-input rsvp-textarea" id="rsvpBlessing" name="blessing" rows="3" placeholder="Leave a note for the couple..."></textarea>
             </div>
             <button type="submit" class="btn rsvp-submit" id="rsvpSubmit">Submit</button>
@@ -1268,7 +1268,13 @@
     }
 
     function toMiddleCopy(){
-      if(setWidth > 0){ viewport.scrollLeft = setWidth; }
+      // center the first column of the middle (2nd) copy in the viewport,
+      // measured directly off the DOM so it's exact regardless of the
+      // viewport's own padding or the peek/gap math above.
+      var target = track.children[original.length];
+      if(!target) return;
+      var targetCenter = target.offsetLeft + target.offsetWidth / 2;
+      viewport.scrollLeft = targetCenter - viewport.clientWidth / 2;
     }
 
     setColWidth();
@@ -1363,6 +1369,22 @@
   var rsvpForm = document.getElementById('rsvpForm');
   var rsvpSubmit = document.getElementById('rsvpSubmit');
   var rsvpStatus = document.getElementById('rsvpStatus');
+  var rsvpConfirmation = document.getElementById('rsvpConfirmation');
+  var rsvpBlessingField = document.getElementById('rsvpBlessingField');
+  var rsvpBlessingInput = document.getElementById('rsvpBlessing');
+
+  // "Add a Blessing" only makes sense as a parting note when someone can't
+  // make it, so it only appears once "Decline" is chosen.
+  function updateBlessingVisibility(){
+    if(!rsvpConfirmation || !rsvpBlessingField) return;
+    var show = rsvpConfirmation.value === 'Decline';
+    rsvpBlessingField.hidden = !show;
+    if(!show && rsvpBlessingInput){ rsvpBlessingInput.value = ''; }
+  }
+  if(rsvpConfirmation){
+    rsvpConfirmation.addEventListener('change', updateBlessingVisibility);
+    updateBlessingVisibility();
+  }
 
   if(rsvpForm){
     rsvpForm.addEventListener('submit', function(e){
@@ -1385,6 +1407,7 @@
           rsvpStatus.textContent = 'Thank you! Your RSVP has been received.';
           rsvpSubmit.textContent = 'Submitted';
           rsvpForm.reset();
+          updateBlessingVisibility();
         })
         .catch(function(){
           rsvpStatus.textContent = "Something went wrong — please message us on WhatsApp instead.";
