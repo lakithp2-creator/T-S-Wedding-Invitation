@@ -469,7 +469,7 @@
   .gallery-viewport::-webkit-scrollbar{ display:none; height:0; }
   .gallery-track{
     display:flex;
-    gap: 14px;
+    gap: 20px;
     scroll-snap-type: x mandatory;
     align-items: flex-start;
   }
@@ -479,12 +479,12 @@
     scroll-snap-align: center;
     /* shared total line height for every column, 10% shorter than a full
        stack of two square tiles would naturally be */
-    --g-col-h: calc((var(--g-col-w, 240px) * 2 + 10px) * 0.81);
+    --g-col-h: calc((var(--g-col-w, 240px) * 2 + 12px) * 0.81);
   }
   .g-col-pair{
     display:flex;
     flex-direction:column;
-    gap: 10px;
+    gap: 12px;
   }
   .g-tile{
     border-radius: 12px;
@@ -495,7 +495,7 @@
   /* every column shares one total height, so no "line" of the gallery ever
      reads shorter or taller than another */
   .g-col-v .g-tile{ width:100%; height: var(--g-col-h); }
-  .g-col-pair .g-tile{ width:100%; height: calc((var(--g-col-h) - 10px) / 2); flex:none; }
+  .g-col-pair .g-tile{ width:100%; height: calc((var(--g-col-h) - 12px) / 2); flex:none; }
   .g-tile img{ width:100%; height:100%; object-fit:cover; display:block; }
   .g-placeholder{
     width:100%; height:100%;
@@ -624,6 +624,60 @@
   .contact-links a:active{ transform: translateY(0); }
   .contact-links a svg{ width:13px; height:13px; flex:none;
   }
+
+  /* ---- RSVP ---- */
+  .rsvp-panel{
+    max-width: 380px;
+    margin: 0 auto;
+    background: rgba(255,255,255,0.4);
+    border-radius: 24px;
+    padding: 26px 24px 28px;
+    box-shadow: 0 20px 40px -28px rgba(var(--shadow-rgb),0.4);
+  }
+  .rsvp-form{ display:flex; flex-direction:column; gap: 18px; }
+  .rsvp-field{ display:flex; flex-direction:column; gap:6px; text-align:left; }
+  .rsvp-label{
+    font-family:'Jost', sans-serif;
+    font-size: .68rem;
+    font-weight:600;
+    letter-spacing:.1em;
+    text-transform:uppercase;
+    color: var(--sage-deep);
+  }
+  .rsvp-optional{
+    text-transform:none;
+    letter-spacing:0;
+    font-weight:400;
+    color: var(--ink-faint);
+  }
+  .rsvp-input{
+    font-family:'Cormorant Garamond', serif;
+    font-size: 1.05rem;
+    color: var(--ink);
+    background: #fff;
+    border: 1px solid rgba(var(--line-rgb),0.9);
+    border-radius: 8px;
+    padding: 0.6em 0.8em;
+    width:100%;
+    box-sizing:border-box;
+    transition: border-color .2s ease, box-shadow .2s ease;
+  }
+  .rsvp-input:focus{
+    outline:none;
+    border-color: var(--sage);
+    box-shadow: 0 0 0 3px rgba(111,138,92,0.15);
+  }
+  .rsvp-textarea{ resize: vertical; min-height: 70px; font-style:italic; font-family:'Cormorant Garamond', serif; }
+  .rsvp-submit{ width:100%; margin-top:4px; border:none; cursor:pointer; }
+  .rsvp-submit:disabled{ opacity:.6; cursor:default; transform:none !important; }
+  .rsvp-status{
+    font-family:'Jost', sans-serif;
+    font-size: .78rem;
+    margin: 0;
+    min-height: 1.2em;
+    color: var(--sage-deep);
+  }
+  .rsvp-status.is-error{ color: #b3492f; }
 
   /* ---- Venue (one soft grouped surface, matches the rest of the page) ---- */
   .venue-panel{
@@ -959,6 +1013,40 @@
       </div>
     </section>
 
+    <!-- ---- RSVP ---- -->
+    <section class="block" id="rsvp">
+      <div class="block-head reveal">
+        <span class="eyebrow">Kindly Respond</span>
+        <h2>RSVP</h2>
+        <div class="seam"><span class="divider"></span></div>
+      </div>
+
+      <div class="reveal">
+        <div class="rsvp-panel">
+          <form id="rsvpForm" class="rsvp-form">
+            <div class="rsvp-field">
+              <label class="rsvp-label" for="rsvpName">Name</label>
+              <input class="rsvp-input" type="text" id="rsvpName" name="name" autocomplete="name" required />
+            </div>
+            <div class="rsvp-field">
+              <label class="rsvp-label" for="rsvpConfirmation">Will You Attend?</label>
+              <select class="rsvp-input" id="rsvpConfirmation" name="confirmation" required>
+                <option value="" disabled selected>Please choose one</option>
+                <option value="Joyfully Accepts">Joyfully Accepts</option>
+                <option value="Regretfully Declines">Regretfully Declines</option>
+              </select>
+            </div>
+            <div class="rsvp-field">
+              <label class="rsvp-label" for="rsvpBlessing">Add a Blessing <span class="rsvp-optional">(Optional)</span></label>
+              <textarea class="rsvp-input rsvp-textarea" id="rsvpBlessing" name="blessing" rows="3" placeholder="Leave a note for the couple..."></textarea>
+            </div>
+            <button type="submit" class="btn rsvp-submit" id="rsvpSubmit">Submit</button>
+            <p class="rsvp-status" id="rsvpStatus" role="status" aria-live="polite"></p>
+          </form>
+        </div>
+      </div>
+    </section>
+
     <!-- ---- Venue / Map ---- -->
     <section class="block" id="venue">
       <div class="block-head reveal">
@@ -1164,7 +1252,7 @@
 
     function setColWidth(){
       // one dominant column per view, with a slice of its neighbours peeking at both edges
-      var peek = 34;
+      var peek = 42;
       var w = viewport.clientWidth - peek * 2;
       track.style.setProperty('--g-col-w', w + 'px');
     }
@@ -1265,6 +1353,47 @@
     timer = setInterval(tick, 30000);
   }
   initCountdown();
+
+  // ---- RSVP form (writes each response as a new row in a Google Sheet) ----
+  // After deploying the Google Apps Script Web App (see GUIDE.md), paste its
+  // URL here (it ends in /exec). Leave blank to show guests a friendly
+  // fallback instead of silently failing.
+  var RSVP_ENDPOINT_URL = "https://script.google.com/macros/s/AKfycbzYnwJcPy3LMw_oaI3RNXiMviR0RtzdGopjExfmPHfR36d69KLVP3vD0eVKMr8pbMD1/exec";
+
+  var rsvpForm = document.getElementById('rsvpForm');
+  var rsvpSubmit = document.getElementById('rsvpSubmit');
+  var rsvpStatus = document.getElementById('rsvpStatus');
+
+  if(rsvpForm){
+    rsvpForm.addEventListener('submit', function(e){
+      e.preventDefault();
+      rsvpStatus.classList.remove('is-error');
+
+      if(!RSVP_ENDPOINT_URL){
+        rsvpStatus.textContent = "RSVP isn't connected yet — please message us on WhatsApp instead.";
+        rsvpStatus.classList.add('is-error');
+        return;
+      }
+
+      var formData = new FormData(rsvpForm);
+      rsvpSubmit.disabled = true;
+      rsvpSubmit.textContent = 'Sending…';
+      rsvpStatus.textContent = '';
+
+      fetch(RSVP_ENDPOINT_URL, { method: 'POST', mode: 'no-cors', body: formData })
+        .then(function(){
+          rsvpStatus.textContent = 'Thank you! Your RSVP has been received.';
+          rsvpSubmit.textContent = 'Submitted';
+          rsvpForm.reset();
+        })
+        .catch(function(){
+          rsvpStatus.textContent = "Something went wrong — please message us on WhatsApp instead.";
+          rsvpStatus.classList.add('is-error');
+          rsvpSubmit.disabled = false;
+          rsvpSubmit.textContent = 'Submit';
+        });
+    });
+  }
 })();
 </script>
 </body>
