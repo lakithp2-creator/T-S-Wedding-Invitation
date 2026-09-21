@@ -262,7 +262,7 @@
   /* ---- Hero / landing ---- */
   .hero{
     min-height: 100vh;
-    min-height: 100dvh;
+    min-height: 100svh;
     padding: 56px 28px 32px;
     text-align:center;
     position:relative;
@@ -350,10 +350,11 @@
   }
   @keyframes bob{ 0%,100%{ transform:translateY(0);} 50%{ transform:translateY(7px);} }
 
-  /* On shorter phone screens (and any browser showing its own address-bar
-     chrome, which shrinks the real visible height below 100dvh on first
-     load), tighten the hero's vertical rhythm so the scroll hint is still
-     visible without scrolling first. */
+  /* On shorter phone screens (the hero uses 100svh — the smallest possible
+     viewport height with the browser's address-bar chrome fully shown —
+     so its height stays fixed and never jumps mid-scroll, but that also
+     means it's the tightest fit) tighten the vertical rhythm so the scroll
+     hint is still visible without scrolling first. */
   @media (max-height: 850px){
     .hero{ padding-top: 40px; padding-bottom: 20px; }
     .hero-tag{ margin-bottom: 16px; }
@@ -943,7 +944,7 @@
           <p class="contact-name">Thisaru</p>
           <p class="contact-role">The Groom</p>
           <div class="contact-links">
-            <a href="https://wa.me/13468681277" data-edit="Thisaru WhatsApp number - use country code, no +, no spaces, e.g. 94771234567" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4c-1.4 0-2.7-.3-3.9-.9L3 20l1.1-5a8.4 8.4 0 1 1 16.9-3.5Z"/></svg>WhatsApp</a>
+            <a href="https://wa.me/13468681277" data-edit="Thisaru WhatsApp number - use country code, no +, no spaces, e.g. 13468681277" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4c-1.4 0-2.7-.3-3.9-.9L3 20l1.1-5a8.4 8.4 0 1 1 16.9-3.5Z"/></svg>WhatsApp</a>
           </div>
         </div>
         <div class="contact-divider"></div>
@@ -952,7 +953,7 @@
           <p class="contact-name">Sanjana</p>
           <p class="contact-role">The Bride</p>
           <div class="contact-links">
-            <a href="https://wa.me/18328840366" data-edit="Sanjana WhatsApp number - use country code, no +, no spaces, e.g. 94779876543" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4c-1.4 0-2.7-.3-3.9-.9L3 20l1.1-5a8.4 8.4 0 1 1 16.9-3.5Z"/></svg>WhatsApp</a>
+            <a href="https://wa.me/18328840366" data-edit="Sanjana WhatsApp number - use country code, no +, no spaces, e.g. 18328840366" target="_blank" rel="noopener"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M21 11.5a8.4 8.4 0 0 1-8.4 8.4c-1.4 0-2.7-.3-3.9-.9L3 20l1.1-5a8.4 8.4 0 1 1 16.9-3.5Z"/></svg>WhatsApp</a>
           </div>
         </div>
       </div>
