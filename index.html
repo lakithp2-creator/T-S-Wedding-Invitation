@@ -3,7 +3,7 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
-<title>Thisaru &amp; Sanjana</title>
+<title>Sanjana &amp; Thisaru</title>
 <link rel="preconnect" href="https://fonts.googleapis.com">
 <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
 <link href="https://fonts.googleapis.com/css2?family=Great+Vibes&family=Cormorant+Garamond:ital,wght@0,400;0,500;0,600;1,400;1,500;1,600&family=Jost:wght@400;500;600&display=swap" rel="stylesheet">
@@ -235,16 +235,26 @@
     position:absolute;
     inset:0;
     display:flex;
+    flex-direction:column;
     align-items:center;
     justify-content:center;
+    gap: 2px;
     text-align:center;
     padding: 0 18%;
     font-family:'Great Vibes', cursive;
     font-size: 1.5rem;
-    line-height:1.15;
+    line-height:1.1;
     color: var(--ink);
     opacity:0;
     transform: scale(.9);
+  }
+  .loading-amp{
+    font-family:'Cormorant Garamond', serif;
+    font-style:italic;
+    font-size: 0.75rem;
+    letter-spacing: 0.04em;
+    color: var(--sage-deep);
+    line-height:1;
   }
   #loading.show .loading-names{
     animation: nameIn .5s ease forwards;
@@ -636,6 +646,7 @@
   }
   .rsvp-form{ display:flex; flex-direction:column; gap: 18px; }
   .rsvp-field{ display:flex; flex-direction:column; gap:6px; text-align:left; }
+  .rsvp-field[hidden]{ display:none; }
   .rsvp-label{
     font-family:'Jost', sans-serif;
     font-size: .68rem;
@@ -833,7 +844,7 @@
             <g class="env-seal">
               <g transform="translate(150,83)">
                 <circle r="15" fill="#ffffff" stroke="#3f5c37" stroke-width="1.25"/>
-                <text x="0" y="4.5" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-size="11" fill="#3f5c37">T&amp;S</text>
+                <text x="0" y="4.5" text-anchor="middle" font-family="'Cormorant Garamond', serif" font-style="italic" font-size="11" fill="#3f5c37">S&amp;T</text>
               </g>
             </g>
           </svg>
@@ -849,7 +860,11 @@
           <path class="heart-path" pathLength="1" d="M100,46 C94,26 78,12 58,12 C34,12 12,28 12,56 C12,82 42,122 100,170"/>
           <path class="heart-path" pathLength="1" d="M100,46 C106,26 122,12 142,12 C166,12 188,28 188,56 C188,82 158,122 100,170"/>
         </svg>
-        <p class="loading-names">Thisaru &amp; Sanjana</p>
+        <p class="loading-names">
+          <span>Sanjana</span>
+          <span class="loading-amp">&amp;</span>
+          <span>Thisaru</span>
+        </p>
       </div>
     </div>
   </div>
@@ -862,10 +877,10 @@
       <p class="hero-tag">We're Getting Married</p>
 
       <div class="hero-photo reveal">
-        <img src="images/couple.jpg" alt="Thisaru and Sanjana" />
+        <img src="images/couple.jpg" alt="Sanjana and Thisaru" />
       </div>
 
-      <h1 class="hero-names" id="heroNames">Thisaru &amp; Sanjana</h1>
+      <h1 class="hero-names" id="heroNames">Sanjana &amp; Thisaru</h1>
       <p class="hero-date">December 16, 2026</p>
       <p class="hero-venue">Asliya Golden Cassandra, Kurunegala</p>
 
@@ -1036,6 +1051,13 @@
                 <option value="Decline">Regretfully decline</option>
               </select>
             </div>
+            <div class="rsvp-field" id="rsvpGuestsField" hidden>
+              <label class="rsvp-label" for="rsvpGuests">How Many Will Attend?</label>
+              <select class="rsvp-input" id="rsvpGuests" name="guests">
+                <option value="1">1</option>
+                <option value="2">2</option>
+              </select>
+            </div>
             <div class="rsvp-field" id="rsvpBlessingField" hidden>
               <label class="rsvp-label" for="rsvpBlessing">Add a Blessing</label>
               <textarea class="rsvp-input rsvp-textarea" id="rsvpBlessing" name="blessing" rows="3" placeholder="Leave a note for the couple..."></textarea>
@@ -1071,7 +1093,7 @@
     </section>
 
     <div class="footer">
-      <span class="script-bold" id="footerNames">Thisaru &amp; Sanjana</span>
+      <span class="script-bold" id="footerNames">Sanjana &amp; Thisaru</span>
       <p>16 · 12 · 2026</p>
     </div>
 
@@ -1370,20 +1392,26 @@
   var rsvpSubmit = document.getElementById('rsvpSubmit');
   var rsvpStatus = document.getElementById('rsvpStatus');
   var rsvpConfirmation = document.getElementById('rsvpConfirmation');
+  var rsvpGuestsField = document.getElementById('rsvpGuestsField');
+  var rsvpGuestsInput = document.getElementById('rsvpGuests');
   var rsvpBlessingField = document.getElementById('rsvpBlessingField');
   var rsvpBlessingInput = document.getElementById('rsvpBlessing');
 
+  // The guest-count field only makes sense when someone is coming, and
   // "Add a Blessing" only makes sense as a parting note when someone can't
-  // make it, so it only appears once "Decline" is chosen.
-  function updateBlessingVisibility(){
-    if(!rsvpConfirmation || !rsvpBlessingField) return;
-    var show = rsvpConfirmation.value === 'Decline';
-    rsvpBlessingField.hidden = !show;
-    if(!show && rsvpBlessingInput){ rsvpBlessingInput.value = ''; }
+  // make it — so each only appears once the matching answer is chosen.
+  function updateRsvpFieldsVisibility(){
+    if(!rsvpConfirmation) return;
+    var accepted = rsvpConfirmation.value === 'Accept';
+    var declined = rsvpConfirmation.value === 'Decline';
+    if(rsvpGuestsField){ rsvpGuestsField.hidden = !accepted; }
+    if(!accepted && rsvpGuestsInput){ rsvpGuestsInput.value = '1'; }
+    if(rsvpBlessingField){ rsvpBlessingField.hidden = !declined; }
+    if(!declined && rsvpBlessingInput){ rsvpBlessingInput.value = ''; }
   }
   if(rsvpConfirmation){
-    rsvpConfirmation.addEventListener('change', updateBlessingVisibility);
-    updateBlessingVisibility();
+    rsvpConfirmation.addEventListener('change', updateRsvpFieldsVisibility);
+    updateRsvpFieldsVisibility();
   }
 
   if(rsvpForm){
@@ -1407,7 +1435,7 @@
           rsvpStatus.textContent = 'Thank you! Your RSVP has been received.';
           rsvpSubmit.textContent = 'Submitted';
           rsvpForm.reset();
-          updateBlessingVisibility();
+          updateRsvpFieldsVisibility();
         })
         .catch(function(){
           rsvpStatus.textContent = "Something went wrong — please message us on WhatsApp instead.";
