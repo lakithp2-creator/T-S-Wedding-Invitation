@@ -1405,7 +1405,12 @@
     var accepted = rsvpConfirmation.value === 'Accept';
     var declined = rsvpConfirmation.value === 'Decline';
     if(rsvpGuestsField){ rsvpGuestsField.hidden = !accepted; }
-    if(!accepted && rsvpGuestsInput){ rsvpGuestsInput.value = '1'; }
+    if(rsvpGuestsInput){
+      // disabled (not just hidden) so a decline doesn't still submit a
+      // guest count — a disabled field is left out of the form data entirely
+      rsvpGuestsInput.disabled = !accepted;
+      if(!accepted){ rsvpGuestsInput.value = '1'; }
+    }
     if(rsvpBlessingField){ rsvpBlessingField.hidden = !declined; }
     if(!declined && rsvpBlessingInput){ rsvpBlessingInput.value = ''; }
   }
