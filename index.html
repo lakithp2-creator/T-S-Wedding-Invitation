@@ -1364,6 +1364,99 @@
         toMiddleCopy();
       }, 150);
     });
+
+    // ---- auto-advance: loops forward every 3s, smoothly, and steps aside
+    // for the viewer the moment they touch or scroll the gallery themselves ----
+    var AUTO_ADVANCE_MS = 3000;
+    var autoTimer = null;
+    var pointerDown = false;
+    var galleryVisible = true;
+    var autoAnimId = null;
+
+    function nearestColIndex(){
+      var best = 0, bestDist = Infinity;
+      for(var i=0;i<track.children.length;i++){
+        var d = Math.abs(track.children[i].offsetLeft - viewport.scrollLeft);
+        if(d < bestDist){ bestDist = d; best = i; }
+      }
+      return best;
+    }
+
+    function animateScrollLeft(targetX, duration){
+      if(autoAnimId){ cancelAnimationFrame(autoAnimId); autoAnimId = null; }
+      var startX = viewport.scrollLeft;
+      var distance = targetX - startX;
+      var startTime = null;
+      function easeOutCubic(t){ return 1 - Math.pow(1 - t, 3); }
+      function step(timestamp){
+        if(startTime === null) startTime = timestamp;
+        var elapsed = timestamp - startTime;
+        var progress = Math.min(elapsed / duration, 1);
+        viewport.scrollLeft = startX + distance * easeOutCubic(progress);
+        if(progress < 1){
+          autoAnimId = requestAnimationFrame(step);
+        } else {
+          autoAnimId = null;
+        }
+      }
+      autoAnimId = requestAnimationFrame(step);
+    }
+
+    function advanceOne(){
+      if(setWidth <= 0 || pointerDown) return;
+      var idx = nearestColIndex();
+      var nextIdx = idx + 1;
+      if(nextIdx >= track.children.length){
+        nextIdx = (nextIdx % original.length) + original.length;
+      }
+      var target = track.children[nextIdx];
+      if(!target) return;
+      var targetLeft = target.offsetLeft + target.offsetWidth / 2 - viewport.clientWidth / 2;
+      animateScrollLeft(targetLeft, 650);
+    }
+
+    function scheduleAuto(){
+      clearTimeout(autoTimer);
+      if(!galleryVisible || pointerDown) return;
+      autoTimer = setTimeout(function(){
+        advanceOne();
+        scheduleAuto();
+      }, AUTO_ADVANCE_MS);
+    }
+
+    // any scroll movement (manual swipe, or our own auto-scroll settling)
+    // pushes the next auto-advance out to a fresh 3s from that point
+    viewport.addEventListener('scroll', function(){
+      scheduleAuto();
+    }, { passive:true });
+
+    // a finger on the gallery always wins: stop the timer the instant they
+    // touch it, and don't let it resume until they let go
+    viewport.addEventListener('pointerdown', function(){
+      pointerDown = true;
+      if(autoAnimId){ cancelAnimationFrame(autoAnimId); autoAnimId = null; }
+      clearTimeout(autoTimer);
+    }, { passive:true });
+    ['pointerup','pointercancel','pointerleave'].forEach(function(evt){
+      viewport.addEventListener(evt, function(){
+        if(!pointerDown) return;
+        pointerDown = false;
+        scheduleAuto();
+      }, { passive:true });
+    });
+
+    if('IntersectionObserver' in window){
+      var galleryIO = new IntersectionObserver(function(entries){
+        entries.forEach(function(entry){
+          galleryVisible = entry.isIntersecting;
+          if(galleryVisible){ scheduleAuto(); }
+          else{ clearTimeout(autoTimer); if(autoAnimId){ cancelAnimationFrame(autoAnimId); autoAnimId = null; } }
+        });
+      }, { threshold: 0.4 });
+      galleryIO.observe(viewport);
+    }
+
+    scheduleAuto();
   }
   initGallerySwiper();
 
